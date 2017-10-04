@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 class Stations extends React.Component {
   constructor(props){
@@ -11,11 +12,14 @@ class Stations extends React.Component {
   }
 
   render(){
-    console.log(this.props.stations);
+    const {receivedStations} = this.props;
     return (
-      <div>
+      <div style={{border: '1px solid black'}}>
         <ul>
-
+          {receivedStations.map((element,i) =>
+            <li key={i}><Link to={`/profile`}>{element}</Link>
+            </li>)
+            }
         </ul>
       </div>
     );

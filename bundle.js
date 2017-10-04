@@ -23193,6 +23193,10 @@ var _app = __webpack_require__(105);
 
 var _app2 = _interopRequireDefault(_app);
 
+var _profile = __webpack_require__(129);
+
+var _profile2 = _interopRequireDefault(_profile);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Root = function Root(_ref) {
@@ -23204,12 +23208,19 @@ var Root = function Root(_ref) {
     _react2.default.createElement(
       _reactRouterDom.HashRouter,
       null,
-      _react2.default.createElement(_reactRouterDom.Route, { path: '/', component: _app2.default })
+      _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _app2.default }),
+        _react2.default.createElement(_reactRouterDom.Route, { path: '/profile', component: _profile2.default })
+      )
     )
   );
 };
 
 exports.default = Root;
+
+// <Route path="artists/:artistId" component={ArtistInfoContainer} />
 
 /***/ }),
 /* 60 */
@@ -26621,12 +26632,16 @@ var _rootReducer = __webpack_require__(101);
 
 var _rootReducer2 = _interopRequireDefault(_rootReducer);
 
+var _rootMiddleware = __webpack_require__(126);
+
+var _rootMiddleware2 = _interopRequireDefault(_rootMiddleware);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var configureStore = function configureStore() {
   var preloadedState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-  return (0, _redux.createStore)(_rootReducer2.default, preloadedState);
+  return (0, _redux.createStore)(_rootReducer2.default, preloadedState, _rootMiddleware2.default);
 };
 
 exports.default = configureStore;
@@ -26748,7 +26763,7 @@ var StationsReducer = function StationsReducer() {
   switch (action.type) {
     case _stationsActions.RECEIVE_STATIONS:
       {
-        // console.log('hey')
+
         newState.stations = action.stations.data;
         return newState;
       }
@@ -27996,6 +28011,7 @@ var fetchStations = exports.fetchStations = function fetchStations() {
     type: FETCH_STATIONS
   };
 };
+
 var receiveStations = exports.receiveStations = function receiveStations(stations) {
   return {
     type: RECEIVE_STATIONS,
@@ -28019,6 +28035,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(110);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -28048,11 +28066,26 @@ var Stations = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      console.log(this.props.stations);
+      var receivedStations = this.props.receivedStations;
+
       return _react2.default.createElement(
         'div',
-        null,
-        _react2.default.createElement('ul', null)
+        { style: { border: '1px solid black' } },
+        _react2.default.createElement(
+          'ul',
+          null,
+          receivedStations.map(function (element, i) {
+            return _react2.default.createElement(
+              'li',
+              { key: i },
+              _react2.default.createElement(
+                _reactRouterDom.Link,
+                { to: '/profile' },
+                element
+              )
+            );
+          })
+        )
       );
     }
   }]);
@@ -28085,20 +28118,255 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var mapStateToProps = function mapStateToProps(_ref) {
   var stations = _ref.stations;
-  return {
-    stations: stations
-  };
+
+  var names = stations.stations.map(function (element) {
+    return element.name;
+  });
+  return { receivedStations: names };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return {
     fetchStations: function fetchStations() {
-      return dispatch((0, _stationsActions.fetchStations)());
+      dispatch((0, _stationsActions.fetchStations)());
     }
   };
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_stations2.default);
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _redux = __webpack_require__(16);
+
+var _stationsMiddleware = __webpack_require__(127);
+
+var _stationsMiddleware2 = _interopRequireDefault(_stationsMiddleware);
+
+var _profileMiddleware = __webpack_require__(130);
+
+var _profileMiddleware2 = _interopRequireDefault(_profileMiddleware);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var RootMiddleware = (0, _redux.applyMiddleware)(_profileMiddleware2.default, _stationsMiddleware2.default);
+
+exports.default = RootMiddleware;
+
+/***/ }),
+/* 127 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _stationsAPIUtil = __webpack_require__(128);
+
+var _stationsActions = __webpack_require__(123);
+
+var StationsMiddleware = function StationsMiddleware(_ref) {
+  var getState = _ref.getState,
+      dispatch = _ref.dispatch;
+  return function (next) {
+    return function (action) {
+      var successCallback = function successCallback(stations) {
+        return dispatch((0, _stationsActions.receiveStations)(stations));
+      };
+      var errorCallback = function errorCallback(err) {
+        return console.log(err);
+      };
+
+      switch (action.type) {
+        case _stationsActions.FETCH_STATIONS:
+          (0, _stationsAPIUtil.fetchStations)(successCallback, errorCallback);
+          return next(action);
+        default:
+          return next(action);
+      }
+    };
+  };
+};
+
+exports.default = StationsMiddleware;
+
+/***/ }),
+/* 128 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+var fetchStations = exports.fetchStations = function fetchStations(success, error) {
+        $.ajax({ url: "https://frontend-tunein.herokuapp.com/api/v1/stations",
+                type: "get",
+                dataType: 'json',
+                success: success,
+                error: error
+        });
+};
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(110);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Profile = function (_React$Component) {
+  _inherits(Profile, _React$Component);
+
+  function Profile(props) {
+    _classCallCheck(this, Profile);
+
+    return _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this, props));
+  }
+
+  _createClass(Profile, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.props.fetchProfile(id);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          _reactRouterDom.Link,
+          { to: '/' },
+          'Back to Index'
+        )
+      );
+    }
+  }]);
+
+  return Profile;
+}(_react2.default.Component);
+
+exports.default = Profile;
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _profileAPIUtil = __webpack_require__(132);
+
+var _profileActions = __webpack_require__(131);
+
+var ProfileMiddleware = function ProfileMiddleware(_ref) {
+  var getState = _ref.getState,
+      dispatch = _ref.dispatch;
+  return function (next) {
+    return function (action) {
+      var successCallback = function successCallback(profile) {
+        return dispatch((0, _profileActions.receiveProfile)(profile));
+      };
+      var errorCallback = function errorCallback(err) {
+        return console.log(err);
+      };
+
+      switch (action.type) {
+        case _profileActions.FETCH_PROFILE:
+          (0, _profileAPIUtil.fetchProfile)(action.id, successCallback, errorCallback);
+          return next(action);
+        default:
+          return next(action);
+      }
+    };
+  };
+};
+
+exports.default = ProfileMiddleware;
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var FETCH_PROFILE = exports.FETCH_PROFILE = "FETCH_PROFILE";
+var RECEIVE_PROFILE = exports.RECEIVE_PROFILE = "RECEIVE_PROFILE";
+
+var fetchProfile = exports.fetchProfile = function fetchProfile(id) {
+  return {
+    type: FETCH_PROFILE,
+    id: id
+  };
+};
+
+var receiveProfile = exports.receiveProfile = function receiveProfile(profile) {
+  return {
+    type: RECEIVE_PROFILE,
+    profile: profile
+  };
+};
+
+/***/ }),
+/* 132 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+var fetchProfile = exports.fetchProfile = function fetchProfile(id, success, error) {
+        $.ajax({ url: "https://frontend-tunein.herokuapp.com/api/v1/station/:id",
+                type: "get",
+                dataType: 'json',
+                success: success,
+                error: error
+        });
+};
 
 /***/ })
 /******/ ]);

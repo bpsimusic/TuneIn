@@ -9,7 +9,7 @@ const StationsReducer = (state = _default, action)=>{
   let newState = {};
   switch(action.type){
     case RECEIVE_STATIONS: {
-      // console.log('hey')
+      
       newState.stations = action.stations.data;
       return newState;
     }

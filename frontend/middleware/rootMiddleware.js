@@ -1,8 +1,10 @@
 import { applyMiddleware } from 'redux';
 import StationsMiddleware from './stationsMiddleware';
+import ProfileMiddlware from './profileMiddleware';
 
 const RootMiddleware = applyMiddleware(
-  StationsMiddleware
+  ProfileMiddlware, StationsMiddleware
 );
+
 
 export default RootMiddleware;

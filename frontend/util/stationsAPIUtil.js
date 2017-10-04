@@ -1,7 +1,8 @@
-export const fetchStations= (id, success) => {
-  $.ajax({url: `frontend-tunein.herokuapp.com/api/v1`,
+export const fetchStations= (success, error)=> {
+  $.ajax({url: `https://frontend-tunein.herokuapp.com/api/v1/stations`,
           type: "get",
           dataType: 'json',
-          success
+          success,
+          error
         });
 };
