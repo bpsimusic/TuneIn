@@ -23197,6 +23197,10 @@ var _profileContainer = __webpack_require__(133);
 
 var _profileContainer2 = _interopRequireDefault(_profileContainer);
 
+var _streamContainer = __webpack_require__(134);
+
+var _streamContainer2 = _interopRequireDefault(_streamContainer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Root = function Root(_ref) {
@@ -23212,15 +23216,14 @@ var Root = function Root(_ref) {
         'div',
         null,
         _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _app2.default }),
-        _react2.default.createElement(_reactRouterDom.Route, { path: '/profile', component: _profileContainer2.default })
+        _react2.default.createElement(_reactRouterDom.Route, { path: '/profile', component: _profileContainer2.default }),
+        _react2.default.createElement(_streamContainer2.default, null)
       )
     )
   );
 };
 
 exports.default = Root;
-
-// <Route path="artists/:artistId" component={ArtistInfoContainer} />
 
 /***/ }),
 /* 60 */
@@ -26691,8 +26694,11 @@ exports.default = rootReducer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _streamActions = __webpack_require__(137);
+
 var _default = {
-  stream: {}
+  stream: ""
 };
 
 var StreamReducer = function StreamReducer() {
@@ -26702,6 +26708,9 @@ var StreamReducer = function StreamReducer() {
   Object.freeze(state);
   var newState = {};
   switch (action.type) {
+    case _streamActions.RECEIVE_STREAM:
+      newState.stream = action.stream;
+      return newState;
     default:
       return state;
   }
@@ -28161,9 +28170,13 @@ var _profileMiddleware = __webpack_require__(130);
 
 var _profileMiddleware2 = _interopRequireDefault(_profileMiddleware);
 
+var _streamMiddleware = __webpack_require__(136);
+
+var _streamMiddleware2 = _interopRequireDefault(_streamMiddleware);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var RootMiddleware = (0, _redux.applyMiddleware)(_profileMiddleware2.default, _stationsMiddleware2.default);
+var RootMiddleware = (0, _redux.applyMiddleware)(_profileMiddleware2.default, _stationsMiddleware2.default, _streamMiddleware2.default);
 
 exports.default = RootMiddleware;
 
@@ -28270,6 +28283,7 @@ var Profile = function (_React$Component) {
     value: function componentWillMount() {
       var id = this.props.location.pathname.split("/profile/")[1];
       this.props.fetchProfile(id);
+      this.props.fetchStream(id);
     }
   }, {
     key: 'displayTags',
@@ -28442,10 +28456,13 @@ var _profile2 = _interopRequireDefault(_profile);
 
 var _profileActions = __webpack_require__(131);
 
+var _streamActions = __webpack_require__(137);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var mapStateToProps = function mapStateToProps(_ref) {
   var profile = _ref.profile;
+
 
   return {
     receivedProfile: profile.profile
@@ -28459,11 +28476,178 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
     },
     clearProfile: function clearProfile() {
       return dispatch((0, _profileActions.clearProfile)());
+    },
+    fetchStream: function fetchStream(id) {
+      return dispatch((0, _streamActions.fetchStream)(id));
     }
   };
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_profile2.default);
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _reactRedux = __webpack_require__(60);
+
+var _stream = __webpack_require__(135);
+
+var _stream2 = _interopRequireDefault(_stream);
+
+var _stationsActions = __webpack_require__(123);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(_ref) {
+  var stream = _ref.stream;
+
+  return { receivedStream: stream.stream };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    fetchStream: function fetchStream(id) {
+      dispatch((0, _stationsActions.fetchStream)(id));
+    },
+    clearStream: function clearStream() {
+      return dispatch((0, _stationsActions.clearStream)());
+    }
+  };
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_stream2.default);
+
+/***/ }),
+/* 135 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Stream = function Stream(props) {
+  var receivedStream = props.receivedStream;
+
+  console.log(receivedStream.streamUrl);
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement('audio', { src: receivedStream.streamUrl, controls: true, autoPlay: true })
+  );
+};
+
+exports.default = Stream;
+
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _streamAPIUtil = __webpack_require__(138);
+
+var _streamActions = __webpack_require__(137);
+
+var StreamMiddleware = function StreamMiddleware(_ref) {
+  var getState = _ref.getState,
+      dispatch = _ref.dispatch;
+  return function (next) {
+    return function (action) {
+      var successCallback = function successCallback(stream) {
+
+        dispatch((0, _streamActions.receiveStream)(stream));
+      };
+      var errorCallback = function errorCallback(err) {
+        return console.log(err);
+      };
+
+      switch (action.type) {
+        case _streamActions.FETCH_STREAM:
+          (0, _streamAPIUtil.fetchStream)(action.id, successCallback, errorCallback);
+          return next(action);
+        default:
+          return next(action);
+      }
+    };
+  };
+};
+
+exports.default = StreamMiddleware;
+
+/***/ }),
+/* 137 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var FETCH_STREAM = exports.FETCH_STREAM = "FETCH_STREAM";
+var RECEIVE_STREAM = exports.RECEIVE_STREAM = "RECEIVE_STREAM";
+var CLEAR_STREAM = exports.CLEAR_STREAM = "CLEAR_STREAM";
+
+var fetchStream = exports.fetchStream = function fetchStream(id) {
+  return {
+    type: FETCH_STREAM,
+    id: id
+  };
+};
+
+var receiveStream = exports.receiveStream = function receiveStream(stream) {
+  return {
+    type: RECEIVE_STREAM,
+    stream: stream
+  };
+};
+
+var clearStream = exports.clearStream = function clearStream() {
+  return {
+    type: CLEAR_STREAM
+  };
+};
+
+/***/ }),
+/* 138 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+        value: true
+});
+var fetchStream = exports.fetchStream = function fetchStream(id, success, error) {
+        $.ajax({ url: "https://frontend-tunein.herokuapp.com/api/v1/station/" + id,
+                type: "get",
+                dataType: 'json',
+                success: success,
+                error: error
+        });
+};
 
 /***/ })
 /******/ ]);

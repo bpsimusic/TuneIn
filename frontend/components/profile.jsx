@@ -10,6 +10,7 @@ class Profile extends React.Component {
   componentWillMount(){
     const id = this.props.location.pathname.split("/profile/")[1];
     this.props.fetchProfile(id);
+    this.props.fetchStream(id);
   }
 
   displayTags(tags){
