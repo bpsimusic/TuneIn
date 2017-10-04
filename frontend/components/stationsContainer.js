@@ -4,8 +4,7 @@ import {fetchStations} from '../actions/stationsActions';
 
 
 const mapStateToProps = ({stations}) => {
-  const names = stations.stations.map(element=>element.name);
-  return {receivedStations: names};
+  return {receivedStations: stations.stations};
 };
 
 const mapDispatchToProps = (dispatch) => {

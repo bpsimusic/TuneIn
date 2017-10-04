@@ -23193,9 +23193,9 @@ var _app = __webpack_require__(105);
 
 var _app2 = _interopRequireDefault(_app);
 
-var _profile = __webpack_require__(129);
+var _profileContainer = __webpack_require__(133);
 
-var _profile2 = _interopRequireDefault(_profile);
+var _profileContainer2 = _interopRequireDefault(_profileContainer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23212,7 +23212,7 @@ var Root = function Root(_ref) {
         'div',
         null,
         _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _app2.default }),
-        _react2.default.createElement(_reactRouterDom.Route, { path: '/profile', component: _profile2.default })
+        _react2.default.createElement(_reactRouterDom.Route, { path: '/profile', component: _profileContainer2.default })
       )
     )
   );
@@ -26719,6 +26719,9 @@ exports.default = StreamReducer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _profileActions = __webpack_require__(131);
+
 var _default = {
   profile: {}
 };
@@ -26730,6 +26733,12 @@ var ProfileReducer = function ProfileReducer() {
   Object.freeze(state);
   var newState = {};
   switch (action.type) {
+    case _profileActions.RECEIVE_PROFILE:
+      newState.profile = action.profile;
+      return newState;
+    case _profileActions.CLEAR_PROFILE:
+      newState.profile = {};
+      return newState;
     default:
       return state;
   }
@@ -26763,7 +26772,6 @@ var StationsReducer = function StationsReducer() {
   switch (action.type) {
     case _stationsActions.RECEIVE_STATIONS:
       {
-
         newState.stations = action.stations.data;
         return newState;
       }
@@ -28080,8 +28088,8 @@ var Stations = function (_React$Component) {
               { key: i },
               _react2.default.createElement(
                 _reactRouterDom.Link,
-                { to: '/profile' },
-                element
+                { to: '/profile/' + element.id },
+                element.name
               )
             );
           })
@@ -28119,10 +28127,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var mapStateToProps = function mapStateToProps(_ref) {
   var stations = _ref.stations;
 
-  var names = stations.stations.map(function (element) {
-    return element.name;
-  });
-  return { receivedStations: names };
+  return { receivedStations: stations.stations };
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
@@ -28254,17 +28259,45 @@ var Profile = function (_React$Component) {
   function Profile(props) {
     _classCallCheck(this, Profile);
 
-    return _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Profile.__proto__ || Object.getPrototypeOf(Profile)).call(this, props));
+
+    _this.state = {};
+    return _this;
   }
 
   _createClass(Profile, [{
     key: 'componentWillMount',
     value: function componentWillMount() {
+      var id = this.props.location.pathname.split("/profile/")[1];
       this.props.fetchProfile(id);
+    }
+  }, {
+    key: 'displayTags',
+    value: function displayTags(tags) {
+      if (!tags) {
+        return;
+      } else {
+        return _react2.default.createElement(
+          'ul',
+          null,
+          tags.map(function (tag, i) {
+            return _react2.default.createElement(
+              'li',
+              { key: i },
+              tag
+            );
+          })
+        );
+      }
     }
   }, {
     key: 'render',
     value: function render() {
+      var _props$receivedProfil = this.props.receivedProfile,
+          tags = _props$receivedProfil.tags,
+          name = _props$receivedProfil.name,
+          imgUrl = _props$receivedProfil.imgUrl;
+
       return _react2.default.createElement(
         'div',
         null,
@@ -28272,8 +28305,23 @@ var Profile = function (_React$Component) {
           _reactRouterDom.Link,
           { to: '/' },
           'Back to Index'
-        )
+        ),
+        _react2.default.createElement('br', null),
+        _react2.default.createElement(
+          'h1',
+          null,
+          name
+        ),
+        _react2.default.createElement('br', null),
+        _react2.default.createElement('img', { src: imgUrl }),
+        _react2.default.createElement('br', null),
+        this.displayTags(tags)
       );
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.props.clearProfile();
     }
   }]);
 
@@ -28334,6 +28382,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 var FETCH_PROFILE = exports.FETCH_PROFILE = "FETCH_PROFILE";
 var RECEIVE_PROFILE = exports.RECEIVE_PROFILE = "RECEIVE_PROFILE";
+var CLEAR_PROFILE = exports.CLEAR_PROFILE = "CLEAR_PROFILE";
 
 var fetchProfile = exports.fetchProfile = function fetchProfile(id) {
   return {
@@ -28349,6 +28398,12 @@ var receiveProfile = exports.receiveProfile = function receiveProfile(profile) {
   };
 };
 
+var clearProfile = exports.clearProfile = function clearProfile() {
+  return {
+    type: CLEAR_PROFILE
+  };
+};
+
 /***/ }),
 /* 132 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -28360,13 +28415,55 @@ Object.defineProperty(exports, "__esModule", {
         value: true
 });
 var fetchProfile = exports.fetchProfile = function fetchProfile(id, success, error) {
-        $.ajax({ url: "https://frontend-tunein.herokuapp.com/api/v1/station/:id",
+        $.ajax({ url: "https://frontend-tunein.herokuapp.com/api/v1/station/" + id,
                 type: "get",
                 dataType: 'json',
                 success: success,
                 error: error
         });
 };
+
+/***/ }),
+/* 133 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _reactRedux = __webpack_require__(60);
+
+var _profile = __webpack_require__(129);
+
+var _profile2 = _interopRequireDefault(_profile);
+
+var _profileActions = __webpack_require__(131);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(_ref) {
+  var profile = _ref.profile;
+
+  return {
+    receivedProfile: profile.profile
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    fetchProfile: function fetchProfile(id) {
+      dispatch((0, _profileActions.fetchProfile)(id));
+    },
+    clearProfile: function clearProfile() {
+      return dispatch((0, _profileActions.clearProfile)());
+    }
+  };
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_profile2.default);
 
 /***/ })
 /******/ ]);

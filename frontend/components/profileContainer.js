@@ -1,18 +1,22 @@
 import {connect} from 'react-redux';
 import Profile from './profile';
-import {fetchProfile} from '../actions/profileActions';
+import {clearProfile, fetchProfile} from '../actions/profileActions';
+
 
 
 const mapStateToProps = ({profile}) => {
-
+  return {
+    receivedProfile: profile.profile
+  };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return ({
+  return {
     fetchProfile: (id)=>{
       dispatch(fetchProfile(id));
-    }
-  });
+    },
+    clearProfile: ()=>dispatch(clearProfile())
+  };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

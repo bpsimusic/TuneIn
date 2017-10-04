@@ -17,7 +17,7 @@ class Stations extends React.Component {
       <div style={{border: '1px solid black'}}>
         <ul>
           {receivedStations.map((element,i) =>
-            <li key={i}><Link to={`/profile`}>{element}</Link>
+            <li key={i}><Link to={`/profile/${element.id}`}>{element.name}</Link>
             </li>)
             }
         </ul>
