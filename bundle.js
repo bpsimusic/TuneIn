@@ -26732,6 +26732,9 @@ exports.default = ProfileReducer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _stationsActions = __webpack_require__(123);
+
 var _default = {
   stations: []
 };
@@ -26743,6 +26746,12 @@ var StationsReducer = function StationsReducer() {
   Object.freeze(state);
   var newState = {};
   switch (action.type) {
+    case _stationsActions.RECEIVE_STATIONS:
+      {
+        // console.log('hey')
+        newState.stations = action.stations.data;
+        return newState;
+      }
     default:
       return state;
   }
@@ -26767,13 +26776,17 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRouter = __webpack_require__(84);
 
+var _stationsContainer = __webpack_require__(125);
+
+var _stationsContainer2 = _interopRequireDefault(_stationsContainer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var App = function App() {
   return _react2.default.createElement(
     'div',
     null,
-    'Hello'
+    _react2.default.createElement(_stationsContainer2.default, null)
   );
 };
 
@@ -27964,6 +27977,128 @@ NavLink.defaultProps = {
 
 
 /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_withRouter__["a" /* default */]);
+
+/***/ }),
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var FETCH_STATIONS = exports.FETCH_STATIONS = "FETCH_STATIONS";
+var RECEIVE_STATIONS = exports.RECEIVE_STATIONS = "RECEIVE_STATIONS";
+
+var fetchStations = exports.fetchStations = function fetchStations() {
+  return {
+    type: FETCH_STATIONS
+  };
+};
+var receiveStations = exports.receiveStations = function receiveStations(stations) {
+  return {
+    type: RECEIVE_STATIONS,
+    stations: stations
+  };
+};
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Stations = function (_React$Component) {
+  _inherits(Stations, _React$Component);
+
+  function Stations(props) {
+    _classCallCheck(this, Stations);
+
+    var _this = _possibleConstructorReturn(this, (Stations.__proto__ || Object.getPrototypeOf(Stations)).call(this, props));
+
+    _this.state = {};
+    return _this;
+  }
+
+  _createClass(Stations, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.props.fetchStations();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      console.log(this.props.stations);
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement('ul', null)
+      );
+    }
+  }]);
+
+  return Stations;
+}(_react2.default.Component);
+
+exports.default = Stations;
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _reactRedux = __webpack_require__(60);
+
+var _stations = __webpack_require__(124);
+
+var _stations2 = _interopRequireDefault(_stations);
+
+var _stationsActions = __webpack_require__(123);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(_ref) {
+  var stations = _ref.stations;
+  return {
+    stations: stations
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    fetchStations: function fetchStations() {
+      return dispatch((0, _stationsActions.fetchStations)());
+    }
+  };
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_stations2.default);
 
 /***/ })
 /******/ ]);
